@@ -74,6 +74,11 @@ class RequireJSOptimizerFilter implements FilterInterface
      * @var array
      */
     protected $options = array();
+    /**
+     * Shim to add to the buildPorfile
+     * @var array
+     */
+    protected $shim = array();
 
     public function __construct($nodePath, $rPath, $baseUrl)
     {
@@ -119,6 +124,11 @@ class RequireJSOptimizerFilter implements FilterInterface
         $this->options[$name] = $value;
     }
 
+    public function setShim($module, $settings)
+    {
+        $this->shim[$module] = $settings;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -158,13 +168,8 @@ class RequireJSOptimizerFilter implements FilterInterface
         ;
 
         // Build profile path, if set, needs to be provided after the optimize flag
-        if ($this->buildProfile) {
-            $buildProfile = $this->buildProfile;
-            if (! file_exists($buildProfile)) {
-                throw new \RuntimeException("Build profile does not exist at ".$buildProfile);
-            }
-            $pb->add($buildProfile);
-        }
+        $buildProfile = $this->getOptimizerBuildProfile();
+        $pb->add($buildProfile);
 
         $pb
             // Configure the primary input
@@ -219,6 +224,27 @@ class RequireJSOptimizerFilter implements FilterInterface
         }
 
         $asset->setContent(file_get_contents($output));
+    }
+
+    protected function getOptimizerBuildProfile()
+    {
+        if ($this->buildProfile) {
+            if (! file_exists($this->buildProfile)) {
+                throw new \RuntimeException("Build profile does not exist at ".$this->buildProfile);
+            }
+            $userProfile = file_get_contents($this->buildProfile);
+            $userProfile = str_replace(array("(",")"), "", $userProfile);
+            $userProfile =  json_decode($userProfile, true);
+        }
+        
+        $buildTemp = tempnam(sys_get_temp_dir(), 'build');
+        $buildFilename = $buildTemp . ($this->extension ? '.' . $this->extension : '');
+        
+        $profile = array_merge($userProfile, array("shim" => $this->shim));
+        $profile = "(" . json_encode($profile) . ")";
+        file_put_contents($buildFilename, $profile);
+
+        return $buildFilename;
     }
 
 }
