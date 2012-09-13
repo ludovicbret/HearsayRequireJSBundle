@@ -156,7 +156,7 @@ class HearsayRequireJSExtension extends Extension
         $config->addMethodCall('setModuleDependency', array($module, $settings));
 
         // TODO handle every levels of options command syntax as it is a namespace based cli command line tool
-        if ($path && $container->hasDefinition('hearsay_require_js.optimizer_filter')) {
+        if ($container->hasDefinition('hearsay_require_js.optimizer_filter')) {
 
             if($settings['deps']) {
                 foreach ($settings['deps'] as $dep) {
