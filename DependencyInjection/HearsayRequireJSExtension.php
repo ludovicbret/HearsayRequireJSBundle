@@ -89,6 +89,11 @@ class HearsayRequireJSExtension extends Extension
             }
         }
 
+        // Add the configured shims
+        foreach ($config['shims'] as $module => $settings) {
+            $this->addShimMapping($module, $settings, $container);
+        }
+
         // Add root directory with an empty namespace
         $this->addNamespaceMapping($config['base_directory'], '', $container, !$hide_unoptimized_assets);
     }
@@ -137,6 +142,33 @@ class HearsayRequireJSExtension extends Extension
 
         $filter = $container->getDefinition('hearsay_require_js.optimizer_filter');
         $filter->addMethodCall('addExternal', array($path));
+    }
+
+    /**
+     * Configure a non amd friendly module to a requireJS set of modules dependencies
+     * @param string $module    The module name
+     * @param array  $settings  The module set of shim's settings
+     * @param ContainerBuilder $container
+     */
+    protected function addModuleDependency($module, $settings, $container)
+    {
+        $config = $container->getDefinition('hearsay_require_js.configuration_builder');
+        $config->addMethodCall('setModuleDependency', array($module, $settings));
+
+        // TODO handle every levels of options command syntax as it is a namespace based cli command line tool
+        if ($path && $container->hasDefinition('hearsay_require_js.optimizer_filter')) {
+
+            if($settings['deps']) {
+                foreach ($settings['deps'] as $dep) {
+                    $container
+                        ->getDefinition('hearsay_require_js.optimizer_filter')
+                        ->addMethodCall('setOption', array('shim.' . $module . 'deps', $dep));
+                }
+            }
+            if($settings['exports']) {
+                $container->getDefinition('hearsay_require_js.optimizer_filter')->addMethodCall('setOption', array('shim.' . $module . 'exports', $settings));
+            }
+        }
     }
 
     /**

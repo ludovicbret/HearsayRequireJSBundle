@@ -58,6 +58,10 @@ class ConfigurationBuilder
     /**
      * @var array
      */
+    protected $shim = null;
+    /**
+     * @var array
+     */
     protected $additionalConfig = array();
     
     /**
@@ -93,6 +97,19 @@ class ConfigurationBuilder
     }
 
     /**
+     * Set a shim to be included in the configuration
+     * @param string $module   The module name
+     * @param array  $settings The module set of shim's settings
+     */
+    public function setModuleDependency($module, $settings)
+    {
+        if ($this->shim === null) {
+            $this->shim = array();
+        }
+        $this->shim[$module] = $settings;
+    }
+
+    /**
      * Set an additional option to output in the config.
      * @param string $option The option name.
      * @param mixed $value The option value.
@@ -118,6 +135,9 @@ class ConfigurationBuilder
         );
         if ($this->paths !== null) {
             $config['paths'] = $this->paths;
+        }
+        if($this->shim !== null) {
+            $config['shim'] = $this->shim;
         }
         return array_merge($config, $this->additionalConfig);
     }    
