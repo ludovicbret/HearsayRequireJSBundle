@@ -1,8 +1,8 @@
 {
-    "name": "hearsay/require-js-bundle",
+    "name": "Lb/require-js2-bundle",
     "type": "symfony-bundle",
     "description": "Hearsay RequireJS Bundle",
-    "keywords": ["requirejs", "require", "javascript"],
+    "keywords": ["requirejs", "requirejs2" "require", "javascript"],
     "license": "MIT",
     "authors": [
         {
