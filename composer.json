@@ -1,5 +1,5 @@
 {
-    "name": "hearsay/require-js-bundle",
+    "name": "hearsay/require-js2-bundle",
     "type": "symfony-bundle",
     "description": "Hearsay RequireJS Bundle",
     "keywords": ["requirejs", "require", "javascript"],
