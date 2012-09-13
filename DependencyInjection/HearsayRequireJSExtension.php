@@ -91,7 +91,7 @@ class HearsayRequireJSExtension extends Extension
 
         // Add the configured shims
         foreach ($config['shims'] as $module => $settings) {
-            $this->addShimMapping($module, $settings, $container);
+            $this->addModuleDependency($module, $settings, $container);
         }
 
         // Add root directory with an empty namespace
