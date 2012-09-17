@@ -51,7 +51,7 @@ class Configuration implements ConfigurationInterface
                         ->isRequired()
                     ->end()
                     ->scalarNode('require_js_src')
-                        ->defaultValue('//cdnjs.cloudflare.com/ajax/libs/require.js/1.0.5/require.min.js')
+                        ->defaultValue('//cdnjs.cloudflare.com/ajax/libs/require.js/2.0.6/require.min.js')
                     ->end()
                     ->scalarNode('initialize_template')
                         ->cannotBeEmpty()
