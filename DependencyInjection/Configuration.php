@@ -80,7 +80,7 @@ class Configuration implements ConfigurationInterface
                                 ->arrayNode('deps')
                                     ->prototype('scalar')->end()
                                 ->end()
-                                ->scalarNode('exports')
+                                ->arrayNode('exports')
                                 ->end()
                             ->end()
                         ->end()
