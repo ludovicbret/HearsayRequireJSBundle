@@ -68,6 +68,9 @@ class HearsayRequireJSExtension extends Extension
                 $buildProfile = $this->getRealPath($config['optimizer']['build_profile'], $container);
                 $filter->addMethodCall('setBuildProfile', array($buildProfile));
             }
+            if (isset($config['optimizer']['timeout'])) {
+                $filter->addMethodCall('setTimeout', array(intval($config['optimizer']['timeout'])));
+            }
             foreach ($config['optimizer']['excludes'] as $exclude) {
                 $filter->addMethodCall('addExclude', array($exclude));
             }
@@ -85,7 +88,7 @@ class HearsayRequireJSExtension extends Extension
             if ($settings['external']) {
                 $this->addExternalNamespaceMapping($settings['location'], $path, $container);
             } else {
-                $this->addNamespaceMapping($settings['location'], $path, $container, !$hide_unoptimized_assets);
+                $this->addNamespaceMapping(array_shift($settings['location']), $path, $container, !$hide_unoptimized_assets);
             }
         }
 

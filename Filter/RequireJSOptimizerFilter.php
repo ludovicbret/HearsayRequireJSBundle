@@ -80,6 +80,11 @@ class RequireJSOptimizerFilter implements FilterInterface
      */
     protected $shim = array();
 
+    /**
+     * Timeout for the node process
+     */
+    private $timeout = null;
+
     public function __construct($nodePath, $rPath, $baseUrl)
     {
         $this->nodePath = $nodePath;
@@ -115,6 +120,16 @@ class RequireJSOptimizerFilter implements FilterInterface
     }
 
     /**
+     * Set the process timeout.
+     *
+     * @param int $timeout The timeout for the process
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
+    }
+
+    /**
      * Set an additional option for the build.
      * @param string $name
      * @param string $value
@@ -138,9 +153,9 @@ class RequireJSOptimizerFilter implements FilterInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Creates a new process builder.
      */
-    public function filterDump(AssetInterface $asset)
+    protected function createProcessBuilder()
     {
         // Figure out which ProcessBuilder class is available to us
         // (https://github.com/kriswallsmith/assetic/commit/0c7158ac6c480eb1dcc9f1c4b5795680d49e2577)
@@ -152,6 +167,20 @@ class RequireJSOptimizerFilter implements FilterInterface
             throw new \RuntimeException('Cannot find an acceptable ProcessBuilder class');
         }
 
+        $pb = new $pb_class();
+
+        if (null !== $this->timeout) {
+            $pb->setTimeout($this->timeout);
+        }
+
+        return $pb;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function filterDump(AssetInterface $asset)
+    {
         $input = tempnam(sys_get_temp_dir(), 'assetic_requirejs');
         $inputFilename = $input . ($this->extension ? '.' . $this->extension : '');
         file_put_contents($inputFilename, $asset->getContent());
@@ -160,7 +189,7 @@ class RequireJSOptimizerFilter implements FilterInterface
 
         // Get a name for the module, for which we'll configure a path
         $name = md5($input);
-        $pb = new $pb_class();
+        $pb = $this->createProcessBuilder();
         $pb
             ->add($this->nodePath)
             ->add($this->rPath)
@@ -236,10 +265,10 @@ class RequireJSOptimizerFilter implements FilterInterface
             $userProfile = str_replace(array("(",")"), "", $userProfile);
             $userProfile =  json_decode($userProfile, true);
         }
-        
+
         $buildTemp = tempnam(sys_get_temp_dir(), 'build');
         $buildFilename = $buildTemp . ($this->extension ? '.' . $this->extension : '');
-        
+
         $profile = array_merge($userProfile, array("shim" => $this->shim));
         $profile = "(" . json_encode($profile) . ")";
         file_put_contents($buildFilename, $profile);

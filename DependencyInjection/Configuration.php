@@ -61,10 +61,19 @@ class Configuration implements ConfigurationInterface
                         ->defaultValue(array())
                         ->useAttributeAsKey('path')
                         ->prototype('array')
-                            ->beforeNormalization()->ifString()->then(function($v) { return array('location' => $v); })->end()
+                            ->beforeNormalization()
+                                ->ifString()
+                                ->then(function($v){
+                                    return array('location' => array($v));
+                                })
+                            ->end()
                             ->children()
-                                ->scalarNode('location')
+                                ->arrayNode('location')
                                     ->isRequired()
+                                    ->requiresAtLeastOneElement()
+                                    ->useAttributeAsKey('name')
+                                    ->prototype('scalar')
+                                    ->end()
                                 ->end()
                                 ->booleanNode('external')
                                     ->defaultFalse()
@@ -112,6 +121,18 @@ class Configuration implements ConfigurationInterface
                                         ->end()
                                     ->end()
                                 ->end()
+                            ->end()
+                            ->scalarNode('timeout')
+                                ->info('The timeout, in seconds, of the node process')
+                                ->validate()
+                                    ->ifTrue(
+                                        function ($v) {
+                                            return !(is_int($v) || ctype_digit($v));
+                                        }
+                                    )
+                                    ->thenInvalid('Invalid number of seconds "%s"')
+                                ->end()
+                                ->defaultValue(60)
                             ->end()
                         ->end()
                     ->end()

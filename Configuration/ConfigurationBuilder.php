@@ -125,12 +125,19 @@ class ConfigurationBuilder
      */
     public function getConfiguration()
     {
-        $rootUrl = '';
         if ($this->useControllerForAssets && $this->container->isScopeActive('request')) {
-            $rootUrl = $this->container->get('request')->getBaseUrl();
+            $baseUrl = $this->container->get('request')->getBaseUrl();
+            $baseUrl = $baseUrl . '/' . \ltrim($this->baseUrl, '/');
+        } else {
+            $baseUrl = $this->container->get('templating.helper.assets')->getUrl(\ltrim($this->baseUrl, '/'));
+            // remove ?version from end of URL
+            if (($p = strpos($baseUrl, '?')) !== false) {
+                $baseUrl = substr($baseUrl, 0, $p);
+            }
         }
+
         $config = array(
-            'baseUrl' => $rootUrl . '/' . \ltrim($this->baseUrl, '/'),
+            'baseUrl' => $baseUrl,
             'locale' => $this->translator->getLocale(),
         );
         if ($this->paths !== null) {
@@ -140,6 +147,6 @@ class ConfigurationBuilder
             $config['shim'] = $this->shim;
         }
         return array_merge($config, $this->additionalConfig);
-    }    
+    }
 
 }
